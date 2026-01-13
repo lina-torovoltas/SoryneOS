@@ -1,4 +1,4 @@
-DISK_IMG := disk.img
+DISK_IMG := SoryneOS.img
 
 SRC_DIR := src
 BUILD_DIR := build
@@ -28,7 +28,7 @@ $(DISK_PATH): $(BOOTLOADER_BIN) $(KERNEL_BIN)
 	@cat $(BOOTLOADER_BIN) $(KERNEL_BIN) > $@
 
 image: $(DISK_PATH)
-	@echo "Disk image is ready: $@"
+	@echo "Disk image is ready: $(DISK_IMG)"
 
 bootloader: $(BOOTLOADER_BIN)
 	@echo "Bootloader built!"
