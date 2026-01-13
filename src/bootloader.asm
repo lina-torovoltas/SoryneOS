@@ -39,9 +39,9 @@ start:
     hlt
     jmp $
 
-boot_msg db "Booting OS..."
+boot_msg db "Booting SoryneOS..."
 boot_msg_len = $ - boot_msg
-error_msg db "Error while loading main kernel!"
+error_msg db "Kernel loading error!"
 error_msg_len = $ - error_msg
 
 

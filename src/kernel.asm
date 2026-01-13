@@ -22,7 +22,7 @@ start:
     hlt
     jmp $
 
-welcome_msg db "Welcome to the OS prototype!"
+welcome_msg db "Welcome to the Soryne!"
 welcome_msg_len = $ - welcome_msg
 
 version_msg db "Current version: 0.0.3 Alpha"
