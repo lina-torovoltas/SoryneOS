@@ -17,7 +17,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install dependencies
-      run: apt install fasm
+      run: sudo apt-get install -y fasm
 
     - name: Build kernel
       run: make kernel
