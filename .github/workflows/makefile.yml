@@ -27,3 +27,6 @@ jobs:
 
     - name: Build image
       run: make image
+
+    - name: Clean build directory
+      run: make clean
