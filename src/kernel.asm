@@ -1,9 +1,9 @@
-org 0x7E00
+org 0x0000
 include 'macros.inc'
 
-start:
-    init_stack 0x9000, 0xFFFF
 
+
+start:
     clear_screen
 
     set_cursor 0, 0
@@ -11,7 +11,7 @@ start:
 
     sleep 2
     set_cursor 2, 0
-    print version_msg, versiom_msg_len
+    print version_msg, version_msg_len
 
     set_cursor 4, 0
     print command_promt_msg, command_promt_msg_len
@@ -19,17 +19,23 @@ start:
 
     print test_msg, test_msg_len
 
+    cli
     hlt
-    jmp $
+
+
 
 welcome_msg db "Welcome to the Soryne!"
 welcome_msg_len = $ - welcome_msg
 
-version_msg db "Current version: 0.0.3 Alpha"
-versiom_msg_len = $ - version_msg
+version_msg db "Current version: 0.1.0 Alpha"
+version_msg_len = $ - version_msg
 
 command_promt_msg db "~ # "
 command_promt_msg_len = $ - command_promt_msg
 
 test_msg db "Input validation passed!"
 test_msg_len = $ - test_msg
+
+
+times 2040 - ($ - $$) db 0
+dq 0x534f656e79726f53
