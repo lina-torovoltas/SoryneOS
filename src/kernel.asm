@@ -1,5 +1,5 @@
 org 0x0000
-include 'macros.inc'
+include 'libs/kernel.inc'
 
 
 
@@ -24,10 +24,11 @@ start:
 
 
 
-welcome_msg db "Welcome to the Soryne!"
+
+welcome_msg db "Welcome to the SoryneOS!"
 welcome_msg_len = $ - welcome_msg
 
-version_msg db "Current version: 0.1.0 Alpha"
+version_msg db "Current version: 0.1.5 Alpha"
 version_msg_len = $ - version_msg
 
 command_promt_msg db "~ # "

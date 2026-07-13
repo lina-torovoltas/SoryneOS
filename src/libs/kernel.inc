@@ -13,25 +13,42 @@ macro clear_segments {
 }
 
 macro enable_a20 {
-    call check_a20
+    local .check_a20, .skip
+
+    jmp .skip
+    .check_a20:
+        xor ax, ax
+        mov es, ax
+        mov ax, 0xFFFF
+        mov ds, ax
+        mov byte [es:0x7E00], 0x00
+        mov byte [ds:0x7E10], 0xFF
+        cmp byte [es:0x7E00], 0xFF
+    
+        xor ax, ax
+        mov ds, ax
+        ret
+    .skip:
+
+    call .check_a20
     jnz .a20_done
     
     mov ax, 0x2401
     int 0x15
-    call check_a20
+    call .check_a20
     jnz .a20_done
     
     in al, 0x92
     or al, 0x02
     out 0x92, al
-    call check_a20
+    call .check_a20
     jnz .a20_done
     
     mov al, 0xD1
     out 0x64, al
     mov al, 0xDF
     out 0x60, al
-    call check_a20
+    call .check_a20
     
     .a20_done:
 }
@@ -64,6 +81,15 @@ macro clear_screen attr=0x07 {
     int 0x10
 
     pop dx cx bx ax
+}
+
+macro get_cursor {
+    push ax bx
+
+    mov ah, 0x03
+    mov bh, 0x00
+    int 0x10
+    pop bx ax
 }
 
 macro set_cursor row, col {

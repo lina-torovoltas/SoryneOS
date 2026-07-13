@@ -1,8 +1,7 @@
 use16
 org 0x7C00
-include 'macros.inc'
-
-
+jmp start
+include 'libs/boot.inc'
 
 start:
     cli
@@ -21,11 +20,48 @@ start:
 
     sti
 
-    clear_screen
-    set_cursor 0, 0
-    print_color boot_msg, boot_msg_len
+    mov bx, 1
+    call sleep
 
-    sleep 5
+    call clear_screen
+
+    mov si, boot_confirm_msg
+    mov cx, boot_confirm_msg_len
+    call print
+
+    mov dh, 2
+    mov dl, 0
+    call set_cursor
+
+    mov si, boot_confirm_keys
+    mov cx, boot_confirm_keys_len
+    call print
+
+wait_for_acp:
+    mov ah, 0x00
+    int 0x16
+    
+    or al, 0x20
+    cmp al, 'y'
+    je boot
+
+    cmp al, 'n'
+    je reboot
+
+    jmp wait_for_acp
+
+boot:
+    mov bx, 1
+    call sleep
+    
+    call clear_screen
+
+    mov si, boot_msg
+    mov cx, boot_msg_len
+    call print
+
+    mov bx, 1
+    call sleep
 
     mov dl, [boot_drive]
     mov ax, 0x1000
@@ -33,48 +69,78 @@ start:
     mov bx, 0x0000
 
     mov ah, 0x02
-    mov al, 4
+    mov al, [kernel_sectors]
     mov ch, 0
     mov cl, 2
     mov dh, 0
     int 0x13
 
-    jc .error
+    jc error
 
     mov ax, 0x1000
     mov ds, ax
 
     jmp 0x1000:0x0000
 
-.error:
-    clear_screen
-    print_color error_msg, error_msg_len, 0x07, 0x04
+error:
+    call clear_screen
 
-    cli
-    hlt
+    mov si, error_msg
+    mov cx, error_msg_len
+    mov al, 0x07
+    mov ah, 0x04
+    call print_color
 
-check_a20:
-    xor ax, ax
-    mov es, ax
-    mov ax, 0xFFFF
-    mov ds, ax
-    mov byte [es:0x7E00], 0x00
-    mov byte [ds:0x7E10], 0xFF
-    cmp byte [es:0x7E00], 0xFF
+    mov al, [kernel_sectors]
+    add al, '0'
+    mov ah, 0x0E
+    int 0x10
+
+    mov dh, 2
+    mov dl, 0
+    call set_cursor
     
-    xor ax, ax
-    mov ds, ax
-    ret
+    mov si, error_retry_msg
+    mov cx, error_retry_msg_len
+    call print
+
+wait_for_key:
+    mov ah, 0x00
+    int 0x16
+    
+    or al, 0x20
+    cmp al, 'r'
+    je boot
+
+    cmp al, 'b'
+    je reboot
+
+    jmp wait_for_key
+
+reboot:
+    jmp 0xFFFF:0x0000 
 
 
 
-boot_msg db "Booting SoryneOS..."
+boot_confirm_msg db "Wait... Are you sure you want to boot the OS?"
+boot_confirm_msg_len = $ - boot_confirm_msg
+
+boot_confirm_keys db "Press Y or N"
+boot_confirm_keys_len = $ - boot_confirm_keys
+
+boot_msg db "Attempting to load kernel..."
 boot_msg_len = $ - boot_msg
 
-error_msg db "Kernel loading error!"
+error_msg db "  sect. Kernel loading error!"
 error_msg_len = $ - error_msg
 
+error_retry_msg db "Press R to retry or B to reboot"
+error_retry_msg_len = $ - error_retry_msg
 
 boot_drive rb 1
+kernel_sectors db 4
+
+
+
 times 510 - ($ - $$) db 0
 dw 0xAA55
